@@ -64,10 +64,11 @@ var Grid = function Grid(options) {
     var nextStep;
     var neighbours = [];
 
-    // console.log("Grid.cells", Grid.cells);
-
+    // Iterate over rows
     Grid.cells.map(function(row) {
+      // Iterate over cells
       row.map(function(cell) {
+        var aliveCount = 0;
         /**
          * Get the coordinates for all the neighbours of this Cell
          * @type {Array}
@@ -77,12 +78,31 @@ var Grid = function Grid(options) {
         /**
          * Iterate over all the neighbours and count the live Cells
          * @param  {Array} n The neighbour coordinates
-         * @return {[type]}   [description]
          */
         neighbours.map(function(n) {
+          var status;
 
-        })
-      })
+          if(typeof Grid.cells[n[0]] == 'undefined') {
+            return;
+          }
+
+          if(typeof Grid.cells[n[0]][n[1]] == 'undefined') {
+            return;
+          }
+
+          if (Grid.cells[n[0]][n[1]].status) {
+            aliveCount++;
+          }
+        }) // end neighbour.map
+
+        /**
+         * Now it's time to apply the rules of the game
+         */
+        console.log(cell);
+
+      }) // end row.map
+
+
     })
 
   }

@@ -7,7 +7,7 @@ var Cell = function Cell(options) {
   options = options || {};
 
   var Cell = {
-    initial: false,
+    status: false,
     row: null,
     col: null,
   };
@@ -18,7 +18,7 @@ var Cell = function Cell(options) {
   if (typeof options.initial !== 'boolean') {
     initial = false;
   };
-  Cell.initial = options.initial;
+  Cell.status = options.initial;
 
   /**
    * Row and col must be specified as an integer in options
@@ -53,7 +53,7 @@ var Cell = function Cell(options) {
     // C
     neighbours.push([Cell.row-1, Cell.col+1]);
     // D
-    neighbours.push([Cell.row, Cell.col+1]);
+    neighbours.push([Cell.row, Cell.col-1]);
     // E
     neighbours.push([Cell.row, Cell.col+1]);
     // F
