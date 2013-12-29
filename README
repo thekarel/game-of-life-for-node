@@ -2,5 +2,7 @@ Game of life in JavaScript
 
 TODO
 
-- The Grid is not infinite, at the moment the game ignores cells outside
-  of the grid, which is not how it should work.
+- Make sure to create new cells if they have more than 3 neighbours
+
+(- The Grid is not infinite, at the moment the game ignores cells outside
+  of the grid, which is not how it should work.)

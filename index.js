@@ -26,24 +26,18 @@
  */
 
 var Grid = require('./Grid');
-var Cell = require('./Cell');
-
-/**
- * Set up options to pass to the Grid constructor
- * @type {Object}
- */
-var gridOptions = {
-  size: 3,
-  Cell: Cell, // we inject the Cell class
-}
+// console.log("Grid", Grid);
+// var Cell = require('./Cell'); // DEPRECATED
 
 /**
  * Initialise the Grid
  * @type {Grid}
  */
-var g = new Grid(gridOptions);
+var g = new Grid({size: 10});
 
-g.init();
+var cells = g.init();
+// console.log("cells", cells);
+// console.log(cells.join("\n"));
 
 g.Console.print();
 
