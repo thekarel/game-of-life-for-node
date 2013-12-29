@@ -37,10 +37,10 @@ module.exports = function(options) {
      */
     Console: {},
 
-    minRow: 0,
-    maxRow: 0,
-    minCol: 0,
-    maxCol: 0,
+    minRow: -5,
+    maxRow: 10,
+    minCol: -5,
+    maxCol: 10,
   };
 
   /**
@@ -69,8 +69,6 @@ module.exports = function(options) {
     var living = Grid.stepLiving();
     var newBorns = Grid.stepNewborns();
     var nextStep = {};
-// Grid.cells = living; return; ///////////////////
-// Grid.cells = newborn; return;//////////
 
 // console.log("living", living);
 // console.log("newBorns", newBorns);
@@ -88,19 +86,19 @@ module.exports = function(options) {
     /**
      * Reset and rebuild the min/max for rows and columns
      */
-    Grid.minRow = 0;
-    Grid.maxRow = Grid.height;
-    Grid.minCol = 0;
-    Grid.maxCol = Grid.width;
-    for(var row in nextStep) {
-      // console.log("row", row);
-      if(row < Grid.minRow) Grid.minRow = row;
-      if(row > Grid.maxRow) Grid.maxRow = row;
-      nextStep[row].map(function(col) {
-        if(col < Grid.minCol) Grid.minCol = col;
-        if(col > Grid.maxCol) Grid.maxCol = col;
-      });
-    }
+    // Grid.minRow = 0;
+    // Grid.maxRow = Grid.height;
+    // Grid.minCol = 0;
+    // Grid.maxCol = Grid.width;
+    // for(var row in nextStep) {
+    //   // console.log("row", row);
+    //   if(row < Grid.minRow) Grid.minRow = row;
+    //   if(row > Grid.maxRow) Grid.maxRow = row;
+    //   nextStep[row].map(function(col) {
+    //     if(col < Grid.minCol) Grid.minCol = col;
+    //     if(col > Grid.maxCol) Grid.maxCol = col;
+    //   });
+    // }
 
     // console.log("Grid", Grid);
 
@@ -202,11 +200,9 @@ module.exports = function(options) {
            */
           if(neighboursAlive === 3) {
             var key = n[0]+''; // make it a string
-// console.log('promising', n[0], n[1]);
             if(typeof newBorns[key] === 'undefined') newBorns[key] = [];
             if(newBorns[key].indexOf(n[1]) < 0) {
               newBorns[key].push(n[1])
-              // console.log('new cell at', n[0], n[1]);
             }
           }
         });
@@ -242,6 +238,10 @@ module.exports = function(options) {
      * @type {Array}
      */
     var neighbours = [];
+
+    row = parseInt(row);
+    col = parseInt(col);
+
 
     // A
     neighbours.push([row-1, col-1]);
@@ -316,38 +316,23 @@ module.exports = function(options) {
      */
     for(var i = Grid.minRow; i <= Grid.maxRow; i++) {
       var thisRow = [];
-      if(typeof Grid.cells[i] !== 'undefined') {
-        for(var ii = Grid.minCol; ii <= Grid.maxCol; ii++) {
-          thisRow.push((Grid.cells[i].indexOf(ii) > -1) ? '0 ' : '. ');
+
+      for(var ii = Grid.minCol; ii <= Grid.maxCol; ii++) {
+        if(typeof Grid.cells[i] === 'undefined') {
+          thisRow.push('.');
+        } else if(typeof Grid.cells[i][ii] !== 'undefined') {
+          thisRow.push((Grid.cells[i].indexOf(ii) > -1) ? ii : '.');
+        } else {
+          thisRow.push('.');
         }
       }
-      display.push(thisRow.join(''));
+
+      display.push(thisRow.join(' '));
     }
 
-    // for(var key in Grid.cells) {
-    //   var thisRow = [];
-    //   for(var i = 0; i < longest; i++) {
-    //     thisRow.push((Grid.cells[key].indexOf(i) > -1) ? '0 ' : '. ');
-    //   }
-    //   display.push(thisRow.join(''));
-    // }
-
-    // console.log(' ');
+    console.log(' ');
     console.log(display.join('\n'));
-    // console.log(' ');
-
-    // var row = '';
-    // var cell;
-    // for(var i = 0; i < Grid.height; i++) {
-    //   for(var ii = 0; ii < Grid.width; ii++) {
-    //     cell = Grid.cells[i][ii];
-    //     row = row + ((cell.status) ? '1 ' : '0 ');
-    //   }
-    //   console.log(row);
-    //   row = '';
-    // }
-
-    // console.log(' ');
+    // console.log(Grid.cells);
   }
 
   // Return the new object

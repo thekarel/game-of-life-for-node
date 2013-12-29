@@ -31,7 +31,7 @@ var Grid = require('./Grid');
  * Initialise the Grid
  * @type {Grid}
  */
-var g = new Grid({size: 5});
+var g = new Grid({size: 6});
 
 var cells = g.init();
 
@@ -41,7 +41,7 @@ function doIt() {
   // console.log("g.cells", g.cells);
   setTimeout(function() {
     doIt();
-  }, 1000);
+  }, 600);
 }
 
 doIt();
