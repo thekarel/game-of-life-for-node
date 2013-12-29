@@ -22,9 +22,9 @@ module.exports = function(options) {
 
     /**
      * An array of Cells indexed by rows then columns
-     * @type {Array}
+     * @type {Object}
      * @example
-     * [[row1col1, row1col2],[row2col1, row2col2]]
+     * { '0': [ 4, 5]}
      */
     cells: {},
 
