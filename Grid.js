@@ -2,6 +2,9 @@
  * Grid class, representing a grid plane in the Game of Life
  */
 
+// Required for object cloning
+var Utils = require('./Utils');
+
 var Grid = function Grid(options) {
 
   options = options || {};
@@ -61,14 +64,31 @@ var Grid = function Grid(options) {
    * @return {Void}
    */
   Grid.step = function() {
-    var nextStep;
     var neighbours = [];
+    /**
+     * An empty array which will hold the cloned cells and will be copied to
+     * Grid.cells once we have the status for all cells for the next step.
+     * This is required since we have to create the full status of the next
+     * step before we can overwrite the old/previous step with it.
+     * @type {Array}
+     */
+    var cellsClone = [];
 
+    // Count rows
+    var rowCount = 0;
+    // Count columns
+    var colCount = 0;
     // Iterate over rows
     Grid.cells.map(function(row) {
+      colCount = 0;
+      cellsClone[rowCount] = [];
       // Iterate over cells
       row.map(function(cell) {
         var aliveCount = 0;
+        /**
+         * See below
+         */
+        var clone;
         /**
          * Get the coordinates for all the neighbours of this Cell
          * @type {Array}
@@ -96,16 +116,43 @@ var Grid = function Grid(options) {
         }) // end neighbour.map
 
         /**
+         * Make a copy of the current cell since we have to apply the rules
+         * to all the cells at the same time - so if we would apply the rule
+         * to the existing cell, we would change the fate of it's neighbours
+         */
+        clone = Utils.clone(cell);
+
+        /**
          * Now it's time to apply the rules of the game
          */
-        console.log(cell);
+        // Rule 1 and 2: live cell dies
+        if(cell.status && (aliveCount < 2 || aliveCount > 3)) {
+          clone.status = false;
+        }
 
-      }) // end row.map
+        // Rule 4: new cell is born
+        if(!cell.status && aliveCount === 3) {
+          clone.status = true;
+        }
 
+        /**
+         * Now push the clone into the cell map of the next step
+         */
+        cellsClone[rowCount][colCount] = clone;
 
-    })
+        colCount++;
+      }) // end column iteration (1 cell)
 
-  }
+      rowCount++;
+    }) // End row iteration
+
+    /**
+     * Done with the iteration, overwrite the Grid.cells with the cellsClone
+     */
+    Grid.cells = cellsClone.concat();
+    delete cellsClone;
+
+  } // end Grid.step
 
   /**
    * Print the board to the console
@@ -122,6 +169,8 @@ var Grid = function Grid(options) {
       console.log(row);
       row = '';
     }
+
+    console.log(' ');
   }
 
   // Return the new object

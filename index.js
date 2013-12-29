@@ -1,5 +1,5 @@
 /**
- * Game of life in JavaScript for Node.js
+ * GAME OF LIFE IN JAVASCRIPT FOR NODE.JS
  * (c) 2013 Charles Szilagyi <k@isr.hu>
  *
  * For rules and background, see
@@ -28,13 +28,34 @@
 var Grid = require('./Grid');
 var Cell = require('./Cell');
 
+/**
+ * Set up options to pass to the Grid constructor
+ * @type {Object}
+ */
 var gridOptions = {
   size: 3,
   Cell: Cell, // we inject the Cell class
 }
 
+/**
+ * Initialise the Grid
+ * @type {Grid}
+ */
 var g = new Grid(gridOptions);
-var gCells = g.init();
+
+g.init();
+
 g.Console.print();
 
 g.step();
+
+g.Console.print();
+
+g.step();
+
+g.Console.print();
+
+g.step();
+
+g.Console.print();
+
