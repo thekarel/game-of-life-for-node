@@ -47,6 +47,7 @@ module.exports = function(options) {
     for(var i = 0; i < Grid.height; i++) {
       Grid.cells[i] = [];
       for(var ii = 0; ii < Grid.width; ii++) {
+        // if (ii >= Grid.width/2) {
         if (Math.random() > 0.5) {
           Grid.cells[i].push(ii);
         };
@@ -61,13 +62,37 @@ module.exports = function(options) {
    * @return {Void}
    */
   Grid.step = function() {
+    var living = Grid.stepLiving();
+    var newborn = Grid.stepNewborns();
+    var nextStep = [];
+
+// console.log("living", living);
+// console.log("newborn", newborn);
+
+    var len = (living.length > newborn.length) ? living.length : newborn.length;
+
+    for (var i = 0; i < len; i++) {
+      nextStep[i] = [];
+      if(typeof living[i] !== 'undefined') {
+        nextStep[i] = nextStep[i].concat(living[i]);
+      }
+      if(typeof newborn[i] !== 'undefined') {
+        nextStep[i] = nextStep[i].concat(newborn[i]);
+      }
+    }
+
+// console.log("nextStep", nextStep);
+// console.log("living.concat(newborn)", living.concat(newborn));
+    Grid.cells = nextStep;
+  }
+
+  /**
+   * Process the living cells and create the next step for them
+   * @return {Void} [description]
+   */
+  Grid.stepLiving = function() {
     /**
-     * Neighbours for 1 cell
-     * @type {Array}
-     */
-    var neighbours = [];
-    /**
-     * An empty array which will hold the cloned cells and will be copied to
+     * An empty array which will hold the living cells and will be copied to
      * Grid.cells once we have the status for all cells for the next step.
      * This is required since we have to create the full status of the next
      * step before we can overwrite the old/previous step with it.
@@ -77,59 +102,24 @@ module.exports = function(options) {
 
     // Count rows
     var rowCount = 0;
-    // Count columns
-    // var colCount = 0;
     // Iterate over rows
     Grid.cells.map(function(row) {
-      // colCount = 0;
       // Create an empty row in cellsClone
       cellsClone[rowCount] = [];
       // Iterate over cells
       row.map(function(cell) {
-        var aliveCount = 0;
-        /**
-         * Make a copy of the current cell since we have to apply the rules
-         * to all the cells at the same time - so if we would apply the rule
-         * to the "real" cell, we would change the fate of it's neighbours in
-         * this very step
-         */
-        // var clone;
-        /**
-         * Get the coordinates for all the neighbours of this Cell
-         * @type {Array}
-         */
-        neighbours = Grid.getNeighboursFor(rowCount, cell);
 
-        /**
-         * Iterate over all the neighbours and count the live Cells
-         * @param  {Array} n The neighbour coordinates as [row,col]
-         */
-        neighbours.map(function(n) {
-          // No such row on the Grid
-          if(typeof Grid.cells[n[0]] == 'undefined') {
-            return;
-          }
-
-          // No such column (cell) in the Row
-          if(Grid.cells[n[0]].indexOf(n[1]) < 0) {
-            return;
-          }
-
-          aliveCount++;
-        }) // end neighbour.map
-
-        // clone = Utils.clone(cell);
+        var neighboursAlive = Grid.getLiveNeighbourCountFor(rowCount, cell);
+        // console.log("neighboursAlive", neighboursAlive);
 
         /**
          * Now it's time to apply the rules of the game
          *
          * Rule 1 and 2: live cell dies -- so we simply don't add it to the
          * next step
-         *
-         * @todo Make sure to create new cells if they have more than 3
-         * neighbours
+         * Rule 3: Cell kept alive
          */
-        if(aliveCount < 2 || aliveCount > 3) {
+        if(neighboursAlive < 2 || neighboursAlive > 3) {
           return;
         }
 
@@ -146,10 +136,58 @@ module.exports = function(options) {
     /**
      * Done with the iteration, overwrite the Grid.cells with the cellsClone
      */
-    Grid.cells = cellsClone.concat();
-    // delete cellsClone;
+    return cellsClone.concat();
 
-  } // end Grid.step
+  } // end Grid.stepLiving
+
+  /**
+   * Process the non living neighbours of living cells to discover newborns
+   * @return {Array}  The collection of newborn cells grouped in rows
+   */
+  Grid.stepNewborns = function() {
+    /**
+     * Holds the newborns to be returned
+     * @type {Array}
+     */
+    var newBorns = [];
+    // Iterate rows
+    for (var i = 0, max = Grid.cells.length; i < max; i++) {
+      newBorns[i] = [];
+
+      // Iterate cells
+      Grid.cells[i].map(function(cell) {
+
+        // Get neighbours of the cell
+        var neighbours = Grid.getNeighboursFor(i, cell);
+
+        // Iterate over neighbours
+        neighbours.map(function(n) {
+
+          // Skip if this cell is present already in the current step
+          // We take care of it in Grid.stepLiving()
+          if(typeof Grid.cells[n[0]] !== 'undefined' &&  Grid.cells[n[0]].indexOf(n[1]) > -1) {
+            return;
+          }
+
+          /**
+           * Count the alive neighbours of the cell
+           * @type {Integer}
+           */
+          var neighboursAlive = Grid.getLiveNeighbourCountFor(n[0], n[1]);
+
+          /**
+           * Yay! This cell has 3 neighbours (Rule 4), so it turns alive
+           */
+          if(neighboursAlive === 3 && newBorns[i].indexOf(n[1]) < 0) {
+            newBorns[i].push(n[1])
+          }
+        });
+      });
+    };
+
+    return newBorns;
+
+  } // end Grid.stepNewborns
 
   /**
    * Get the coordinates neighburs of the cell at given row and column
@@ -197,6 +235,43 @@ module.exports = function(options) {
     return neighbours;
   }
 
+
+  Grid.getLiveNeighbourCountFor = function(row, col) {
+    /**
+     * Number of neighbours that are alive
+     * @type {Number}
+     */
+    var aliveCount = 0;
+
+    /**
+     * Get the coordinates for all the neighbours of this Cell
+     * @type {Array}
+     */
+    neighbours = Grid.getNeighboursFor(row, col);
+
+    /**
+     * Iterate over all the neighbours and count the live Cells
+     * @param  {Array} n The neighbour coordinates as [row,col]
+     */
+    neighbours.map(function(n) {
+      // No such row on the Grid
+      if(typeof Grid.cells[n[0]] == 'undefined') {
+        return;
+      }
+
+      // No such column (cell) in the Row
+      if(Grid.cells[n[0]].indexOf(n[1]) < 0) {
+        return;
+      }
+
+      aliveCount++;
+    }) // end neighbour.map
+
+    return aliveCount;
+
+  } // end getLiveNeighbourCountFor
+
+
   /**
    * Print the board to the console
    * @return {Void}
@@ -222,7 +297,8 @@ module.exports = function(options) {
     Grid.cells.map(function(row) {
       var thisRow = [];
       for(var i = 0; i < longest; i++) {
-        thisRow.push((row.indexOf(i) > -1) ? '()' : '..');
+        // thisRow.push((row.indexOf(i) > -1) ? i+'!' : i+' ');
+        thisRow.push((row.indexOf(i) > -1) ? 'O ' : '. ');
       }
       display.push(thisRow.join(''));
     })

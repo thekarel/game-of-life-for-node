@@ -33,7 +33,7 @@ var Grid = require('./Grid');
  * Initialise the Grid
  * @type {Grid}
  */
-var g = new Grid({size: 10});
+var g = new Grid({size: 3});
 
 var cells = g.init();
 // console.log("cells", cells);
@@ -42,14 +42,20 @@ var cells = g.init();
 g.Console.print();
 
 g.step();
-
 g.Console.print();
 
 g.step();
-
 g.Console.print();
 
 g.step();
+g.Console.print();
 
+g.step();
+g.Console.print();
+
+g.step();
+g.Console.print();
+
+g.step();
 g.Console.print();
 
