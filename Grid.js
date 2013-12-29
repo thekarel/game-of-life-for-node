@@ -1,18 +1,16 @@
 /**
- * Grid class, representing a grid plane in the Game of Life
+ * GAME OF LIFE IN JAVASCRIPT FOR NODE.JS
+ * (c) 2013 Charles Szilagyi http://linkd.in/1dNtFS5 <k@isr.hu>
+ *
+ * Repo: https://bitbucket.org/thekarel/game-of-life-for-node/overview
+ *
+ * Grid class, representing the grid plane in the Game of Life
  */
-
-// Required for object cloning
-// var Utils = require('./Utils');
 
 module.exports = function(options) {
 
   options = options || {};
   options.size = options.size || 10;
-
-  // if (typeof options.Cell == 'undefined') {
-  //   throw 'You must pass the Cell class as Cell in options'
-  // }
 
   /**
    * The Grid class to be returned
@@ -21,7 +19,6 @@ module.exports = function(options) {
   var Grid = {
     height: options.size,
     width: options.size,
-    // Cell: options.Cell,
 
     /**
      * An array of Cells indexed by rows then columns
@@ -35,24 +32,46 @@ module.exports = function(options) {
      * Console output related logic
      * @type {Object}
      */
-    Console: {},
+    Console: {}
   };
 
 
   /**
    * Set the Grid size so Grid.print know how large the matrix is
-   * @todo add logic
    */
-  Grid.setSize = function() {
-    Grid.minRow = 0;
-    Grid.maxRow = Grid.height;
-    Grid.minCol = 0;
-    Grid.maxCol = Grid.width;
-  }
+  Grid.setSize = function(init) {
+    init = init || false;
+
+    /**
+     * Set sane size on the first run
+     */
+    if(init) {
+      Grid.minRow = 0;
+      Grid.maxRow = Grid.height + 5;
+      Grid.minCol = 0;
+      Grid.maxCol = Grid.width + 5;
+      return;
+    }
+
+    /**
+     * Reset and rebuild the min/max for rows and columns
+     */
+    for(var row in Grid.cells) {
+      var intRow = parseInt(row, 10);
+      if(row < Grid.minRow) Grid.minRow = intRow;
+      if(row > Grid.maxRow) Grid.maxRow = intRow;
+      Grid.cells[row].map(function(col) {
+        var intCol = parseInt(col, 10);
+        if(intCol < Grid.minCol) Grid.minCol = intCol;
+        if(intCol > Grid.maxCol) Grid.maxCol = intCol;
+      });
+    }
+
+  }; // end Grid.setSize
 
 
   /**
-   * Initialise the grid
+   * Initialise the grid, by random seed at the moment
    * @return {Array} the array of cells
    */
   Grid.init = function() {
@@ -60,20 +79,21 @@ module.exports = function(options) {
     /**
      * Set the grid size for display
      */
-    Grid.setSize();
+    Grid.setSize(true);
 
     var initial;
     for(var i = 0; i < Grid.height; i++) {
       Grid.cells[i] = [];
       for(var ii = 0; ii < Grid.width; ii++) {
-        // if (ii >= Grid.width/2) {
         if (Math.random() > 0.5) {
           Grid.cells[i].push(ii);
-        };
+        }
       }
     }
     return Grid.cells;
-  };
+
+  }; // end Grid.init
+
 
   /**
    * Step forward in time (tick), update the Cells on the Grid
@@ -91,42 +111,25 @@ module.exports = function(options) {
     for(var row in living) {
       nextStep[row] = living[row].concat();
     }
-    for(var row in newBorns) {
-      if(typeof living[row] !== 'undefined') {
-        nextStep[row] = newBorns[row].concat(nextStep[row]);
+    for(var rowB in newBorns) {
+      if(typeof living[rowB] !== 'undefined') {
+        nextStep[rowB] = newBorns[rowB].concat(nextStep[rowB]);
       } else {
-        nextStep[row] = newBorns[row].concat();
+        nextStep[rowB] = newBorns[rowB].concat();
       }
     }
 
-// console.log('========');
-// console.log("living", living);
-// console.log("newBorns", newBorns);
-// console.log("nextStep", nextStep);
+    /**
+     * Update the cells attached to the Grid
+     */
+    Grid.cells = nextStep;
 
     /**
-     * Reset and rebuild the min/max for rows and columns
+     * Update the matrix size
      */
-    // Grid.minRow = 0;
-    // Grid.maxRow = Grid.height;
-    // Grid.minCol = 0;
-    // Grid.maxCol = Grid.width;
-    // for(var row in nextStep) {
-    //   // console.log("row", row);
-    //   if(row < Grid.minRow) Grid.minRow = row;
-    //   if(row > Grid.maxRow) Grid.maxRow = row;
-    //   nextStep[row].map(function(col) {
-    //     if(col < Grid.minCol) Grid.minCol = col;
-    //     if(col > Grid.maxCol) Grid.maxCol = col;
-    //   });
-    // }
-
-    // console.log("Grid", Grid);
-
     Grid.setSize();
 
-    Grid.cells = nextStep;
-  }
+  }; // end Grid.step
 
 
   /**
@@ -143,8 +146,6 @@ module.exports = function(options) {
      */
     var cellsClone = {};
 
-    // Count rows
-    // var rowCount = 0;
     // Iterate over rows
     for(var row in Grid.cells) {
       // Create an empty row in cellsClone
@@ -152,6 +153,7 @@ module.exports = function(options) {
       // Iterate over cells
       Grid.cells[row].map(function(cell) {
 
+        // Get the number of living cells next to the cell
         var neighboursAlive = Grid.getLiveNeighbourCountFor(row, cell);
 
         /**
@@ -160,6 +162,8 @@ module.exports = function(options) {
          * Rule 1 and 2: live cell dies -- so we simply don't add it to the
          * next step
          * Rule 3: Cell kept alive
+         *
+         * (Newborn cells are created in Grid.stepNewborns)
          */
         if(neighboursAlive < 2 || neighboursAlive > 3) {
           return;
@@ -168,20 +172,18 @@ module.exports = function(options) {
         /**
          * Cell survived, so let's push it into the next step
          */
-        cellsClone[row].push(cell)
+        cellsClone[row].push(cell);
 
-      }) // end column iteration (1 cell)
+      }); // end column iteration (1 cell)
 
-      // rowCount++;
     } // End row iteration
 
     /**
-     * Done with the iteration, overwrite the Grid.cells with the cellsClone
+     * Done with the iteration, return the array of survived cells
      */
-// console.log("cellsClone", cellsClone);
     return cellsClone;
 
-  } // end Grid.stepLiving
+  }; // end Grid.stepLiving
 
 
   /**
@@ -225,19 +227,23 @@ module.exports = function(options) {
             var key = n[0]+''; // make it a string
             if(typeof newBorns[key] === 'undefined') newBorns[key] = [];
             if(newBorns[key].indexOf(n[1]) < 0) {
-              newBorns[key].push(n[1])
+              newBorns[key].push(n[1]);
             }
           }
         });
       });
-    };
+    }
 
+    /**
+     * Return the array of newborn cells
+     */
     return newBorns;
 
-  } // end Grid.stepNewborns
+  }; // end Grid.stepNewborns
+
 
   /**
-   * Get the coordinates neighburs of the cell at given row and column
+   * Get the coordinates of all neighburs of the cell at given row and column
    * @param  {Integer} row
    * @param  {Integer} col
    * @return {Array}     The list of neighbour coordinates
@@ -262,9 +268,8 @@ module.exports = function(options) {
      */
     var neighbours = [];
 
-    row = parseInt(row);
-    col = parseInt(col);
-
+    row = parseInt(row, 10);
+    col = parseInt(col, 10);
 
     // A
     neighbours.push([row-1, col-1]);
@@ -284,9 +289,16 @@ module.exports = function(options) {
     neighbours.push([row+1, col+1]);
 
     return neighbours;
-  }
+
+  }; // end Grid.getNeighboursFor
 
 
+  /**
+   * Count the living cells that are neighours of the specified cell
+   * @param  {Integer} row
+   * @param  {Integer} col
+   * @return {Integer}     The number of living neighbours
+   */
   Grid.getLiveNeighbourCountFor = function(row, col) {
     /**
      * Number of neighbours that are alive
@@ -316,11 +328,11 @@ module.exports = function(options) {
       }
 
       aliveCount++;
-    }) // end neighbour.map
+    }); // end neighbour.map
 
     return aliveCount;
 
-  } // end getLiveNeighbourCountFor
+  }; // end getLiveNeighbourCountFor
 
 
   /**
@@ -328,7 +340,6 @@ module.exports = function(options) {
    * @return {Void}
    */
   Grid.Console.print = function() {
-// console.log("Grid.cells", Grid.cells);
     /**
      * Holding the visible representation of each row
      * @type {Array}
@@ -341,27 +352,27 @@ module.exports = function(options) {
     for(var i = Grid.minRow; i <= Grid.maxRow; i++) {
       var thisRow = [];
 
-      // thisRow.push('Row '+i+' >');
-
       for(var ii = Grid.minCol; ii <= Grid.maxCol; ii++) {
         if(typeof Grid.cells[i] === 'undefined') {
-          thisRow.push('.');
+          thisRow.push(' ');
         } else if(Grid.cells[i].indexOf(ii) > -1) {
           thisRow.push('X');
         } else {
-          thisRow.push('.');
+          thisRow.push(' ');
         }
       }
 
       display.push(thisRow.join(' '));
     }
 
-    console.log(' ');
+    var lines = process.stdout.getWindowSize()[1];
+    for(var ic = 0; ic < lines; ic++) {
+        console.log('\r\n');
+    }
     console.log(display.join('\n'));
-    // console.log(Grid.cells);
-  }
+
+  }; // end Grid.print
 
   // Return the new object
   return Grid;
-
-}
+};

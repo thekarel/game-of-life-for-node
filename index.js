@@ -1,47 +1,33 @@
 /**
  * GAME OF LIFE IN JAVASCRIPT FOR NODE.JS
- * (c) 2013 Charles Szilagyi <k@isr.hu>
+ * (c) 2013 Charles Szilagyi http://linkd.in/1dNtFS5 <k@isr.hu>
  *
- * For rules and background, see
- * http://conwaylife.com/wiki/Conway%27s_Game_of_Life
- *
- * Summary:
- *
- * The universe of the Game of Life is an infinite two-dimensional orthogonal
- * grid of square cells, each of which is in one of two possible states, live
- * or dead. Every cell interacts with its eight neighbours, which are the
- * cells that are directly horizontally, vertically, or diagonally adjacent.
- * At each step in time, the following transitions occur:
- *
- *   Any live cell with fewer than two live neighbours dies, as if by needs
- *   caused by underpopulation.
- *
- *   Any live cell with more than three live neighbours dies, as if by
- *   overcrowding.
- *
- *   Any live cell with two or three live neighbours lives, unchanged, to the
- *   next generation.
- *
- *   Any dead cell with exactly three live neighbours cells will come to life.
+ * Repo: https://bitbucket.org/thekarel/game-of-life-for-node/overview
  */
+
+/* Configuration this way: */
+var SIZE = 15;
+var SPEED = 600;
+/* Configuration ends. You can't set the seed - yet */
+
 
 var Grid = require('./Grid');
 
 /**
  * Initialise the Grid
- * @type {Grid}
  */
-var g = new Grid({size: 3});
-
+var g = new Grid({size: SIZE});
 var cells = g.init();
 
+/**
+ * Run the animation forever by printing and ticking forward
+ */
 function doIt() {
   g.Console.print();
   g.step();
-  // console.log("g.cells", g.cells);
   setTimeout(function() {
     doIt();
-  }, 600);
+  }, SPEED);
 }
 
 doIt();
