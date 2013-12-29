@@ -26,36 +26,22 @@
  */
 
 var Grid = require('./Grid');
-// console.log("Grid", Grid);
-// var Cell = require('./Cell'); // DEPRECATED
 
 /**
  * Initialise the Grid
  * @type {Grid}
  */
-var g = new Grid({size: 3});
+var g = new Grid({size: 5});
 
 var cells = g.init();
-// console.log("cells", cells);
-// console.log(cells.join("\n"));
 
-g.Console.print();
+function doIt() {
+  g.step();
+  g.Console.print();
+  // console.log("g.cells", g.cells);
+  setTimeout(function() {
+    doIt();
+  }, 1000);
+}
 
-g.step();
-g.Console.print();
-
-g.step();
-g.Console.print();
-
-g.step();
-g.Console.print();
-
-g.step();
-g.Console.print();
-
-g.step();
-g.Console.print();
-
-g.step();
-g.Console.print();
-
+doIt();
