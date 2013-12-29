@@ -31,13 +31,13 @@ var Grid = require('./Grid');
  * Initialise the Grid
  * @type {Grid}
  */
-var g = new Grid({size: 6});
+var g = new Grid({size: 3});
 
 var cells = g.init();
 
 function doIt() {
-  g.step();
   g.Console.print();
+  g.step();
   // console.log("g.cells", g.cells);
   setTimeout(function() {
     doIt();

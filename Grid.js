@@ -36,18 +36,32 @@ module.exports = function(options) {
      * @type {Object}
      */
     Console: {},
-
-    minRow: -5,
-    maxRow: 10,
-    minCol: -5,
-    maxCol: 10,
   };
+
+
+  /**
+   * Set the Grid size so Grid.print know how large the matrix is
+   * @todo add logic
+   */
+  Grid.setSize = function() {
+    Grid.minRow = 0;
+    Grid.maxRow = Grid.height;
+    Grid.minCol = 0;
+    Grid.maxCol = Grid.width;
+  }
+
 
   /**
    * Initialise the grid
    * @return {Array} the array of cells
    */
   Grid.init = function() {
+
+    /**
+     * Set the grid size for display
+     */
+    Grid.setSize();
+
     var initial;
     for(var i = 0; i < Grid.height; i++) {
       Grid.cells[i] = [];
@@ -70,8 +84,6 @@ module.exports = function(options) {
     var newBorns = Grid.stepNewborns();
     var nextStep = {};
 
-// console.log("living", living);
-// console.log("newBorns", newBorns);
 
     /**
      * Merge the two result sets
@@ -80,8 +92,17 @@ module.exports = function(options) {
       nextStep[row] = living[row].concat();
     }
     for(var row in newBorns) {
-      nextStep[row] = newBorns[row].concat(nextStep[row]);
+      if(typeof living[row] !== 'undefined') {
+        nextStep[row] = newBorns[row].concat(nextStep[row]);
+      } else {
+        nextStep[row] = newBorns[row].concat();
+      }
     }
+
+// console.log('========');
+// console.log("living", living);
+// console.log("newBorns", newBorns);
+// console.log("nextStep", nextStep);
 
     /**
      * Reset and rebuild the min/max for rows and columns
@@ -101,6 +122,8 @@ module.exports = function(options) {
     // }
 
     // console.log("Grid", Grid);
+
+    Grid.setSize();
 
     Grid.cells = nextStep;
   }
@@ -305,6 +328,7 @@ module.exports = function(options) {
    * @return {Void}
    */
   Grid.Console.print = function() {
+// console.log("Grid.cells", Grid.cells);
     /**
      * Holding the visible representation of each row
      * @type {Array}
@@ -317,11 +341,13 @@ module.exports = function(options) {
     for(var i = Grid.minRow; i <= Grid.maxRow; i++) {
       var thisRow = [];
 
+      // thisRow.push('Row '+i+' >');
+
       for(var ii = Grid.minCol; ii <= Grid.maxCol; ii++) {
         if(typeof Grid.cells[i] === 'undefined') {
           thisRow.push('.');
-        } else if(typeof Grid.cells[i][ii] !== 'undefined') {
-          thisRow.push((Grid.cells[i].indexOf(ii) > -1) ? ii : '.');
+        } else if(Grid.cells[i].indexOf(ii) > -1) {
+          thisRow.push('X');
         } else {
           thisRow.push('.');
         }
