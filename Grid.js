@@ -127,6 +127,13 @@ module.exports = function(options) {
 
       Grid.cells[i] = [];
 
+      /**
+       * Skip lines with exclamation marks! -- can be used as comments
+       */
+      if(/!/.test(seed[i])) {
+        continue;
+      }
+
       var line = seed[i].split('');
 
       /**
