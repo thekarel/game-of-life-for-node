@@ -11,6 +11,7 @@ module.exports = function(options) {
 
   options = options || {};
   options.size = options.size || 10;
+  options.seed = options.seed || '';
 
   /**
    * The Grid class to be returned
@@ -19,6 +20,12 @@ module.exports = function(options) {
   var Grid = {
     height: options.size,
     width: options.size,
+    minRow: 0,
+    maxRow: 3,
+    minCol: 0,
+    maxCol: 3,
+
+    seed: options.seed,
 
     /**
      * An array of Cells indexed by rows then columns
@@ -32,38 +39,27 @@ module.exports = function(options) {
      * Console output related logic
      * @type {Object}
      */
-    Console: {}
+    Console: {},
   };
 
 
   /**
    * Set the Grid size so Grid.print know how large the matrix is
    */
-  Grid.setSize = function(init) {
-    init = init || false;
-
-    /**
-     * Set sane size on the first run
-     */
-    if(init) {
-      Grid.minRow = 0;
-      Grid.maxRow = Grid.height + 5;
-      Grid.minCol = 0;
-      Grid.maxCol = Grid.width + 5;
-      return;
-    }
+  Grid.setSize = function() {
 
     /**
      * Reset and rebuild the min/max for rows and columns
+     * Adding an extra row and column to both sides
      */
     for(var row in Grid.cells) {
       var intRow = parseInt(row, 10);
-      if(row < Grid.minRow) Grid.minRow = intRow;
-      if(row > Grid.maxRow) Grid.maxRow = intRow;
+      if(row < Grid.minRow) Grid.minRow = intRow-1;
+      if(row > Grid.maxRow) Grid.maxRow = intRow+1;
       Grid.cells[row].map(function(col) {
         var intCol = parseInt(col, 10);
-        if(intCol < Grid.minCol) Grid.minCol = intCol;
-        if(intCol > Grid.maxCol) Grid.maxCol = intCol;
+        if(intCol < Grid.minCol) Grid.minCol = intCol-1;
+        if(intCol > Grid.maxCol) Grid.maxCol = intCol+1;
       });
     }
 
@@ -71,16 +67,32 @@ module.exports = function(options) {
 
 
   /**
-   * Initialise the grid, by random seed at the moment
-   * @return {Array} the array of cells
+   * Initialise the grid by calling the apropriate init function
    */
   Grid.init = function() {
 
     /**
+     * Init from the options.seed or with random
+     */
+    if (Grid.seed !== '') {
+      Grid.initFromSeed(options.seed);
+    } else {
+      Grid.initRandom();
+    }
+
+    /**
      * Set the grid size for display
      */
-    Grid.setSize(true);
+    Grid.setSize();
 
+  }; // end Grid.init
+
+
+  /**
+   * Initialise the Grid with random seed
+   * @return {Void}
+   */
+  Grid.initRandom = function() {
     var initial;
     for(var i = 0; i < Grid.height; i++) {
       Grid.cells[i] = [];
@@ -90,9 +102,44 @@ module.exports = function(options) {
         }
       }
     }
-    return Grid.cells;
+  };
 
-  }; // end Grid.init
+
+  /**
+   * Initialise the Grid by mapping the seed string to Grid cells
+   * @param  {String} seed The seed string
+   * @return {Void}
+   * @example
+   * An example seed for a glider:
+   * ...
+   * .O.
+   * ..O
+   * OOO
+   * ...
+   */
+  Grid.initFromSeed = function(seed) {
+    seed = seed.split("\n");
+
+    /**
+     * Walk over the lines
+     */
+    for (var i = 0; i < seed.length; i++) {
+
+      Grid.cells[i] = [];
+
+      var line = seed[i].split('');
+
+      /**
+       * Process the dots
+       */
+      for (var ii = 0; ii < line.length; ii++) {
+        if (line[ii] === 'O') {
+          Grid.cells[i].push(ii);
+        };
+      };
+    }
+
+  } // end processSeed
 
 
   /**
@@ -100,6 +147,11 @@ module.exports = function(options) {
    * @return {Void}
    */
   Grid.step = function() {
+
+    if (Object.keys(Grid.cells).length === 0) {
+      throw "Can't step without cells - please initialise the Grid!";
+    };
+
     var living = Grid.stepLiving();
     var newBorns = Grid.stepNewborns();
     var nextStep = {};
@@ -356,7 +408,7 @@ module.exports = function(options) {
         if(typeof Grid.cells[i] === 'undefined') {
           thisRow.push(' ');
         } else if(Grid.cells[i].indexOf(ii) > -1) {
-          thisRow.push('X');
+          thisRow.push('O');
         } else {
           thisRow.push(' ');
         }
