@@ -1,17 +1,18 @@
 # GAME OF LIFE IN JAVASCRIPT FOR NODE.JS
 (c) 2013  [Charles Szilagyi](http://linkd.in/1dNtFS5) | <k@isr.hu> | [Repo at BitBucket](https://bitbucket.org/thekarel/game-of-life-for-node/overview)
 
-For rules and background, see the [LifeWiki](http://conwaylife.com/wiki/Conway%27s_Game_of_Life)
-
 ## How to run:
 
     git clone https://bitbucket.org/thekarel/game-of-life-for-node.git
     cd game-of-life-for-node
-    node index.js
+    node index.js seed/golly.txt
 
-You can configure the initial size of the animation in index.js. At the moment, there is no way to set the seed.
+You can configure the speed of the animation and the size of the random seed in
+index.js.
 
-![](https://bitbucket.org/thekarel/game-of-life-for-node/raw/3b5dfb7ea6c9bda88a4e98af550d40db82204ae6/GoL.gif)
+For rules and background, see the [LifeWiki](http://conwaylife.com/wiki/Conway%27s_Game_of_Life), which contains a lot of patterns in plain text which you can feed to this app ([e.g. Acorn](http://www.conwaylife.com/patterns/acorn.cells)).
+
+![](https://bitbucket.org/thekarel/game-of-life-for-node/raw/35ead38557194384e429ba6b178788cc432ae047/seed/golly.gif)
 
 Logo for the repo is from [DevinatArt](http://mientefuego.deviantart.com/art/Carbon-Glider-129268523)
 
