@@ -5,7 +5,7 @@ For rules and background, see the [LifeWiki](http://conwaylife.com/wiki/Conway%2
 
 ## How to run:
 
-    git clone https://thekarel@bitbucket.org/thekarel/game-of-life-for-node.git
+    git clone https://bitbucket.org/thekarel/game-of-life-for-node.git
     cd game-of-life-for-node
     node index.js
 
