@@ -12,7 +12,7 @@ index.js.
 
 For rules and background, see the [LifeWiki](http://conwaylife.com/wiki/Conway%27s_Game_of_Life), which contains a lot of patterns in plain text which you can feed to this app ([e.g. Acorn](http://www.conwaylife.com/patterns/acorn.cells)).
 
-![](https://bitbucket.org/thekarel/game-of-life-for-node/raw/35ead38557194384e429ba6b178788cc432ae047/seed/golly.gif)
+![](https://bitbucket.org/thekarel/game-of-life-for-node/raw/24e20231d9f9e1d6f2ddb0cb79b95375bfad9af7/seed/golly.gif)
 
 Logo for the repo is from [DevinatArt](http://mientefuego.deviantart.com/art/Carbon-Glider-129268523)
 
