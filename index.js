@@ -7,6 +7,7 @@
 
 var fs = require('fs');
 var Grid = require('./Grid');
+var Console = require('./Grid.Console');
 
 /**
  * CONFIGURATION
@@ -22,7 +23,7 @@ var SEED = '';
 var SIZE = 10;
 
 /**
- * Check if a seed file is supplied
+ * Check if a seed file is supplied and try to read it
  */
 if (typeof process.argv[2] !== 'undefined') {
   SEED = fs.readFileSync(process.argv[2], 'utf8');
@@ -31,14 +32,14 @@ if (typeof process.argv[2] !== 'undefined') {
 /**
  * Initialise the Grid
  */
-var g = new Grid({size: SIZE, seed: SEED});
+var g = new Grid({size: SIZE, seed: SEED, output: new Console});
 g.init();
 
 /**
  * Run the animation forever by printing and ticking forward
  */
 function doIt() {
-  g.Console.print();
+  g.print();
   g.step();
   setTimeout(function() {
     doIt();

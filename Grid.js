@@ -12,6 +12,7 @@ module.exports = function(options) {
   options = options || {};
   options.size = options.size || 10;
   options.seed = options.seed || '';
+  options.output = options.output || 'Console';
 
   /**
    * The Grid class to be returned
@@ -24,6 +25,7 @@ module.exports = function(options) {
     maxRow: 3,
     minCol: 0,
     maxCol: 3,
+    output: options.output,
 
     seed: options.seed,
 
@@ -34,36 +36,7 @@ module.exports = function(options) {
      * { '0': [ 4, 5]}
      */
     cells: {},
-
-    /**
-     * Console output related logic
-     * @type {Object}
-     */
-    Console: {},
   };
-
-
-  /**
-   * Set the Grid size so Grid.print know how large the matrix is
-   */
-  Grid.setSize = function() {
-
-    /**
-     * Reset and rebuild the min/max for rows and columns
-     * Adding an extra row and column to both sides
-     */
-    for(var row in Grid.cells) {
-      var intRow = parseInt(row, 10);
-      if(row < Grid.minRow) Grid.minRow = intRow-1;
-      if(row > Grid.maxRow) Grid.maxRow = intRow+1;
-      Grid.cells[row].map(function(col) {
-        var intCol = parseInt(col, 10);
-        if(intCol < Grid.minCol) Grid.minCol = intCol-1;
-        if(intCol > Grid.maxCol) Grid.maxCol = intCol+1;
-      });
-    }
-
-  }; // end Grid.setSize
 
 
   /**
@@ -79,12 +52,6 @@ module.exports = function(options) {
     } else {
       Grid.initRandom();
     }
-
-    /**
-     * Set the grid size for display
-     */
-    Grid.setSize();
-
   }; // end Grid.init
 
 
@@ -102,7 +69,7 @@ module.exports = function(options) {
         }
       }
     }
-  };
+  }; // end Grid.initRandom
 
 
   /**
@@ -146,7 +113,7 @@ module.exports = function(options) {
       };
     }
 
-  } // end processSeed
+  } // end Grid.processSeed
 
 
   /**
@@ -182,11 +149,6 @@ module.exports = function(options) {
      * Update the cells attached to the Grid
      */
     Grid.cells = nextStep;
-
-    /**
-     * Update the matrix size
-     */
-    Grid.setSize();
 
   }; // end Grid.step
 
@@ -391,46 +353,19 @@ module.exports = function(options) {
 
     return aliveCount;
 
-  }; // end getLiveNeighbourCountFor
+  }; // end Grid.getLiveNeighbourCountFor
 
 
   /**
-   * Print the board to the console
+   * Print the current Grid, using Grid.output
+   * The output class should have a method named print, accepting the current
+   * array of cells
    * @return {Void}
    */
-  Grid.Console.print = function() {
-    /**
-     * Holding the visible representation of each row
-     * @type {Array}
-     */
-    var display = [];
-
-    /**
-     * Prepare the display of each row
-     */
-    for(var i = Grid.minRow; i <= Grid.maxRow; i++) {
-      var thisRow = [];
-
-      for(var ii = Grid.minCol; ii <= Grid.maxCol; ii++) {
-        if(typeof Grid.cells[i] === 'undefined') {
-          thisRow.push(' ');
-        } else if(Grid.cells[i].indexOf(ii) > -1) {
-          thisRow.push('O');
-        } else {
-          thisRow.push(' ');
-        }
-      }
-
-      display.push(thisRow.join(' '));
-    }
-
-    var lines = process.stdout.getWindowSize()[1];
-    for(var ic = 0; ic < lines; ic++) {
-        console.log('\r\n');
-    }
-    console.log(display.join('\n'));
-
+  Grid.print = function() {
+    this.output.print(this.cells);
   }; // end Grid.print
+
 
   // Return the new object
   return Grid;
