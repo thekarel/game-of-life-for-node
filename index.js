@@ -33,7 +33,6 @@ if (typeof process.argv[2] !== 'undefined') {
  * Initialise the Grid
  */
 var g = new Grid({size: SIZE, seed: SEED, output: new Console});
-g.init();
 
 /**
  * Run the animation forever by printing and ticking forward

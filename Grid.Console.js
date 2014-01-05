@@ -1,14 +1,12 @@
 /**
- * Console component for Grid.js
+ * Output component for Grid.js, enables writing Grid to the console
  */
 
-module.exports = function() {
+var Console = function() {
 
-  Console = {
-    cell: {
-      DEAD: ' ',
-      LIVE: 'o'
-    }
+  this.cell = {
+    DEAD: ' ',
+    LIVE: 'o'
   };
 
 
@@ -16,15 +14,15 @@ module.exports = function() {
    * Set the Grid size so Grid.print knows how large the matrix is
    * Trying to set it up so point 0:0 is in the middle of the screen
    */
-  Console.setSize = function() {
+  this.setSize = function() {
 
     /**
      * Check if stdout is available
      */
-     if (typeof process.stdout === 'undefined'
-          || typeof process.stdout.columns !== 'number') {
-        throw 'Console output not available';
-     };
+    if (typeof process.stdout === 'undefined'
+         || typeof process.stdout.columns !== 'number') {
+       throw 'Console output not available';
+    };
 
     /**
      * Read rows and cols of the console and create a matrix
@@ -48,14 +46,14 @@ module.exports = function() {
   /**
    * Run the setSize function on object creation
    */
-  Console.setSize();
+  this.setSize();
 
 
   /**
   * Print the board to the console
   * @return {Void}
   */
-  Console.print = function(cells) {
+  this.print = function(cells) {
     /**
     * Holding the visible representation of each row
     * @type {Array}
@@ -96,6 +94,6 @@ module.exports = function() {
 
   }; // end Grid.print
 
-  return Console;
+}; // end Console
 
-}; // end module.export
+module.exports = Console;

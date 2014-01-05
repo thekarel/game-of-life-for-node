@@ -7,69 +7,69 @@
  * Grid class, representing the grid plane in the Game of Life
  */
 
-module.exports = function(options) {
-
-  options = options || {};
-  options.size = options.size || 10;
-  options.seed = options.seed || '';
-  options.output = options.output || 'Console';
+var Grid = function Grid(options) {
 
   /**
-   * The Grid class to be returned
-   * @type {Object}
+   * Save a reference to this
    */
-  var Grid = {
-    height: options.size,
-    width: options.size,
-    minRow: 0,
-    maxRow: 3,
-    minCol: 0,
-    maxCol: 3,
-    output: options.output,
+  var Grid = this;
 
-    seed: options.seed,
+  /**
+   * Handle options and defaults
+   */
+  this.options = options || {};
+  this.options.size = options.size || 10;
+  this.options.seed = options.seed || '';
+  this.options.output = options.output || 'Console';
 
-    /**
-     * An array of Cells indexed by rows then columns
-     * @type {Object}
-     * @example
-     * { '0': [ 4, 5]}
-     */
-    cells: {},
-  };
+  this.height = this.options.size;
+  this.width = this.options.size;
+  this.minRow = 0;
+  this.maxRow = 3;
+  this.minCol = 0;
+  this.maxCol = 3;
+  this.output = this.options.output;
+  this.seed = this.options.seed;
 
+  /**
+   * An array of Cells indexed by rows then columns
+   * @type {Object}
+   * @example
+   * { '0': [ 4, 5]}
+   */
+  this.cells = {},
 
   /**
    * Initialise the grid by calling the apropriate init function
    */
-  Grid.init = function() {
+  this.init = function() {
 
     /**
      * Init from the options.seed or with random
      */
-    if (Grid.seed !== '') {
-      Grid.initFromSeed(options.seed);
+    if (this.seed !== '') {
+      this.initFromSeed(options.seed);
     } else {
-      Grid.initRandom();
+      this.initRandom();
     }
-  }; // end Grid.init
+  }; // end this.init
 
 
   /**
    * Initialise the Grid with random seed
    * @return {Void}
    */
-  Grid.initRandom = function() {
+  this.initRandom = function() {
     var initial;
-    for(var i = 0; i < Grid.height; i++) {
-      Grid.cells[i] = [];
-      for(var ii = 0; ii < Grid.width; ii++) {
+    for(var i = 0; i < this.height; i++) {
+      this.cells[i] = [];
+      for(var ii = 0; ii < this.width; ii++) {
         if (Math.random() > 0.5) {
-          Grid.cells[i].push(ii);
+          this.cells[i].push(ii);
         }
       }
     }
-  }; // end Grid.initRandom
+  }; // end this.initRandom
 
 
   /**
@@ -84,7 +84,7 @@ module.exports = function(options) {
    * OOO
    * ...
    */
-  Grid.initFromSeed = function(seed) {
+  this.initFromSeed = function(seed) {
     seed = seed.split("\n");
 
     /**
@@ -92,7 +92,7 @@ module.exports = function(options) {
      */
     for (var i = 0; i < seed.length; i++) {
 
-      Grid.cells[i] = [];
+      this.cells[i] = [];
 
       /**
        * Skip lines with exclamation marks! -- can be used as comments
@@ -108,26 +108,26 @@ module.exports = function(options) {
        */
       for (var ii = 0; ii < line.length; ii++) {
         if (line[ii] === 'O') {
-          Grid.cells[i].push(ii);
+          this.cells[i].push(ii);
         };
       };
     }
 
-  } // end Grid.processSeed
+  } // end this.processSeed
 
 
   /**
    * Step forward in time (tick), update the Cells on the Grid
    * @return {Void}
    */
-  Grid.step = function() {
+  this.step = function() {
 
-    if (Object.keys(Grid.cells).length === 0) {
+    if (Object.keys(this.cells).length === 0) {
       throw "Can't step without cells - please initialise the Grid!";
     };
 
-    var living = Grid.stepLiving();
-    var newBorns = Grid.stepNewborns();
+    var living = this.stepLiving();
+    var newBorns = this.stepNewborns();
     var nextStep = {};
 
 
@@ -148,19 +148,20 @@ module.exports = function(options) {
     /**
      * Update the cells attached to the Grid
      */
-    Grid.cells = nextStep;
+    this.cells = nextStep;
 
-  }; // end Grid.step
+  }; // end this.step
 
 
   /**
    * Process the living cells and create the next step for them
    * @return {Void} [description]
    */
-  Grid.stepLiving = function() {
+  this.stepLiving = function() {
+    // var Grid = this;
     /**
      * An empty array which will hold the living cells and will be copied to
-     * Grid.cells once we have the status for all cells for the next step.
+     * this.cells once we have the status for all cells for the next step.
      * This is required since we have to create the full status of the next
      * step before we can overwrite the old/previous step with it.
      * @type {Array}
@@ -168,11 +169,11 @@ module.exports = function(options) {
     var cellsClone = {};
 
     // Iterate over rows
-    for(var row in Grid.cells) {
+    for(var row in this.cells) {
       // Create an empty row in cellsClone
       cellsClone[row] = [];
       // Iterate over cells
-      Grid.cells[row].map(function(cell) {
+      this.cells[row].map(function(cell) {
 
         // Get the number of living cells next to the cell
         var neighboursAlive = Grid.getLiveNeighbourCountFor(row, cell);
@@ -184,7 +185,7 @@ module.exports = function(options) {
          * next step
          * Rule 3: Cell kept alive
          *
-         * (Newborn cells are created in Grid.stepNewborns)
+         * (Newborn cells are created in this.stepNewborns)
          */
         if(neighboursAlive < 2 || neighboursAlive > 3) {
           return;
@@ -204,24 +205,26 @@ module.exports = function(options) {
      */
     return cellsClone;
 
-  }; // end Grid.stepLiving
+  }; // end this.stepLiving
 
 
   /**
    * Process the non living neighbours of living cells to discover newborns
    * @return {Array}  The collection of newborn cells grouped in rows
    */
-  Grid.stepNewborns = function() {
+  this.stepNewborns = function() {
+    // var Grid = this;
+
     /**
      * Holds the newborns to be returned
      * @type {Array}
      */
     var newBorns = {};
     // Iterate rows
-    for (var row in Grid.cells) {
+    for (var row in this.cells) {
 
       // Iterate existing cells
-      Grid.cells[row].map(function(cell) {
+      this.cells[row].map(function(cell) {
 
         // Get neighbours of the cell
         var neighbours = Grid.getNeighboursFor(row, cell);
@@ -230,7 +233,7 @@ module.exports = function(options) {
         neighbours.map(function(n) {
 
           // Skip if this cell is present already in the current step
-          // We take care of it in Grid.stepLiving()
+          // We take care of it in this.stepLiving()
           if(typeof Grid.cells[n[0]] !== 'undefined' &&  Grid.cells[n[0]].indexOf(n[1]) > -1) {
             return;
           }
@@ -260,7 +263,7 @@ module.exports = function(options) {
      */
     return newBorns;
 
-  }; // end Grid.stepNewborns
+  }; // end this.stepNewborns
 
 
   /**
@@ -282,7 +285,7 @@ module.exports = function(options) {
    * no neighbour at that coordinate. Plus we can actually create these cells
    * if they should become alive.
    */
-  Grid.getNeighboursFor = function(row, col) {
+  this.getNeighboursFor = function(row, col) {
     /**
      * Hold the neighbours of the cell
      * @type {Array}
@@ -311,7 +314,7 @@ module.exports = function(options) {
 
     return neighbours;
 
-  }; // end Grid.getNeighboursFor
+  }; // end this.getNeighboursFor
 
 
   /**
@@ -320,7 +323,9 @@ module.exports = function(options) {
    * @param  {Integer} col
    * @return {Integer}     The number of living neighbours
    */
-  Grid.getLiveNeighbourCountFor = function(row, col) {
+  this.getLiveNeighbourCountFor = function(row, col) {
+    // var Grid = this;
+
     /**
      * Number of neighbours that are alive
      * @type {Number}
@@ -331,7 +336,7 @@ module.exports = function(options) {
      * Get the coordinates for all the neighbours of this Cell
      * @type {Array}
      */
-    neighbours = Grid.getNeighboursFor(row, col);
+    neighbours = this.getNeighboursFor(row, col);
 
     /**
      * Iterate over all the neighbours and count the live Cells
@@ -353,20 +358,25 @@ module.exports = function(options) {
 
     return aliveCount;
 
-  }; // end Grid.getLiveNeighbourCountFor
+  }; // end this.getLiveNeighbourCountFor
 
 
   /**
-   * Print the current Grid, using Grid.output
+   * Print the current Grid, using this.output
    * The output class should have a method named print, accepting the current
    * array of cells
    * @return {Void}
    */
-  Grid.print = function() {
+  this.print = function() {
     this.output.print(this.cells);
-  }; // end Grid.print
+  }; // end this.print
 
 
-  // Return the new object
-  return Grid;
+  /**
+   * Run this.init on object creation
+   */
+  this.init();
+
 };
+
+module.exports = Grid;
